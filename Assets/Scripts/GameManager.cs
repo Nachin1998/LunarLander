@@ -4,16 +4,60 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public Spaceship spaceship;
-    public GameObject floor;
+    public GameObject pauseMenu;
+    public static bool alive;
+    bool pauseMenuActive;
     void Start()
     {
-
+        pauseMenuActive = false;
     }
 
-    // Update is called once per frame
+    private void FixedUpdate()
+    {
+       
+    }
+
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!pauseMenuActive)
+            {
+                pauseMenuActive = true;
+            }
+            else
+            {
+                pauseMenuActive = false;
+            }
+        }
+
+        if (pauseMenuActive)
+        {
+            Pause();
+        }
+        else
+        {
+            Resume();
+        }
+    }
+
+
+    public void Resume()
+    {
+        pauseMenu.SetActive(false);
+        Time.timeScale = 1;
+        pauseMenuActive = false;
+    }
+
+    public void Pause()
+    {
+        pauseMenu.SetActive(true);
+        Time.timeScale = 0;
+        pauseMenuActive = true;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

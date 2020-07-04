@@ -1,12 +1,21 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Spaceship : MonoBehaviour
 {
     public float fuel = 100.0f;
     public float rotationAngle = 1;
     public GameObject particleObject;
+    public float fuelConsumed = 0.1f;
+    public GameObject explosion;
 
-    ParticleSystem ps;
+    [Space]
+
+    public TextMeshProUGUI fuelText;
+    public Image fuelBar;
+
+    ParticleSystem flame;
     Rigidbody2D rb;
     Vector2 power;
     BoxCollider2D bc;
@@ -18,8 +27,8 @@ public class Spaceship : MonoBehaviour
 
     void Start()
     {
-        ps = particleObject.GetComponentInChildren<ParticleSystem>();
-        ps.Stop();
+        flame = particleObject.GetComponentInChildren<ParticleSystem>();
+        flame.Stop();
 
         rb = gameObject.GetComponent<Rigidbody2D>();
         
@@ -35,14 +44,18 @@ public class Spaceship : MonoBehaviour
         {            
             if (fuel > 0)
             {
-                fuel -= 0.1f;
-                ps.Play();
+                fuel -= fuelConsumed;
+                flame.Play();
                 rb.AddRelativeForce(power);
+            }
+            else
+            {
+                flame.Stop();
             }
         }
         else
         {
-            ps.Stop();
+            flame.Stop();
         }
 
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
@@ -66,6 +79,15 @@ public class Spaceship : MonoBehaviour
         {
             Debug.Log("Bruh");
         }
+
+        fuelBar.fillAmount = fuel / 100;
+        fuelText.text = ((int)fuel).ToString() + "%"; //puaj
+
+        if(fuel <= 0)
+        {
+            fuelText.text = "Empty";
+            fuelText.color = Color.red;
+        }
     }
 
     public bool HasPlayerLanded()
@@ -83,18 +105,12 @@ public class Spaceship : MonoBehaviour
     void OnCollisionEnter2D(Collision2D col)
     {
         Debug.Log(col.relativeVelocity.magnitude);
-        if (//col.relativeVelocity.magnitude >= landingSpeed ||
-           transform.rotation.z < -rotation.z ||
-           transform.rotation.z > rotation.z)
+
+        if (col.relativeVelocity.magnitude >= landingSpeed)
         {
+            Instantiate(explosion, transform.position, Quaternion.identity);
             Destroy(gameObject);
-        }
-        else
-        {
-            Debug.Log("Rotation: " + transform.rotation.z);
-
-        }
+            GameManager.alive = false;
+        }     
     }
-
-
 }
