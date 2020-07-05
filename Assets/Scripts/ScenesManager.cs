@@ -7,10 +7,9 @@ using UnityEngine.SceneManagement;
 
 public class ScenesManager : MonoBehaviour
 {
-    public GameManager gManager;
-
     public void Play()
     {
+        GameManager.level = GameManager.Level.One;
         SceneManager.LoadScene(1);
     }
 

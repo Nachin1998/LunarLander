@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
 
     float camPosZ = -100;
     float offset;
+    float distancePlayerPlatform;
     
     public static bool isDead;
     public static bool win;
@@ -137,6 +138,7 @@ public class GameManager : MonoBehaviour
         if (ship.HasPlayerLanded())
         {
             scoreText.gameObject.SetActive(false);
+            timerText.gameObject.SetActive(false);
             if (!win)
             {
                 score += winBonus;
@@ -148,16 +150,18 @@ public class GameManager : MonoBehaviour
         if(gameTimer <= 0)
         {
             ship.DestroyShip();
-        }
+        }        
 
         if (ship)
         {
-            if (Vector2.Distance(ship.transform.position, platform.transform.position) < 25 &&
+            distancePlayerPlatform = Vector2.Distance(ship.transform.position, platform.transform.position);
+
+            if (distancePlayerPlatform < 25 &&
                 camPosZ < -50)
             {
                 camPosZ += offset;
             }
-            else if (Vector2.Distance(ship.transform.position, platform.transform.position) > 25 && 
+            else if (distancePlayerPlatform > 25 && 
                      camPosZ > -100)
                  {
                      camPosZ -= offset;

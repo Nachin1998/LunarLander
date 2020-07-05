@@ -95,10 +95,14 @@ public class Spaceship : MonoBehaviour
         fuelBar.fillAmount = fuel / 100;
         fuelText.text = ((int)fuel).ToString() + "%"; //puaj
 
-        if (startTimer && timer < 2)
+        if (!startTimer)
+        {
+            timer = 0;
+        }
+        else if (startTimer && timer < 2)
         {
             timer += Time.deltaTime;
-        }        
+        }
 
         if(fuel <= 0)
         {
@@ -109,13 +113,11 @@ public class Spaceship : MonoBehaviour
 
     public bool HasPlayerLanded()
     {
-        return (timer >= 2);
+        return (timer >= maxTimer);
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        Debug.Log(col.relativeVelocity.magnitude);
-
         if (col.relativeVelocity.magnitude >= landingSpeed)
         {
             Instantiate(explosion, transform.position, Quaternion.identity);
@@ -132,7 +134,6 @@ public class Spaceship : MonoBehaviour
              {
                  onGround = true;
              }
-
     }
 
     public void DestroyShip()
