@@ -4,11 +4,12 @@ using TMPro;
 
 public class Spaceship : MonoBehaviour
 {
-    public float fuel = 100.0f;
+    public float fuel = 100;
     public float rotationAngle = 1;
     public GameObject particleObject;
     public float fuelConsumed = 0.1f;
     public GameObject explosion;
+    public AudioSource thrustSound;
 
     [Space]
 
@@ -18,11 +19,13 @@ public class Spaceship : MonoBehaviour
     ParticleSystem flame;
     Rigidbody2D rb;
     Vector2 power;
-    BoxCollider2D bc;
-    Quaternion rotation = new Quaternion(0, 0, 30, 0);
+    int maxTimer;
 
     float landingSpeed;
-    bool startTimer = false;
+    bool startTimer;
+    public bool flying;
+    public bool floating;
+    public bool onGround;
     float timer;
 
     void Start()
@@ -34,28 +37,47 @@ public class Spaceship : MonoBehaviour
         
         power = new Vector2(0, 20);
         
+        maxTimer = 2;
+
         landingSpeed = 10.0f;
+
+        startTimer = false;
+
+        flying = false;
+
+        timer = 0;
     }
 
-    // Update is called once per frame
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {            
             if (fuel > 0)
             {
+                flying = true;
                 fuel -= fuelConsumed;
                 flame.Play();
                 rb.AddRelativeForce(power);
+                if (!thrustSound.isPlaying)
+                {
+                    thrustSound.Play();
+                }
             }
             else
             {
                 flame.Stop();
+                thrustSound.Stop();
             }
         }
         else
         {
+            flying = false;
             flame.Stop();
+            thrustSound.Stop();
+            if (!onGround)
+            {
+                floating = true;
+            }
         }
 
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
@@ -70,18 +92,13 @@ public class Spaceship : MonoBehaviour
     }
     void Update()
     {
-        if (startTimer && timer < 3)
-        {
-            timer += Time.deltaTime;
-        }
-
-        if(transform.rotation.z > 10)
-        {
-            Debug.Log("Bruh");
-        }
-
         fuelBar.fillAmount = fuel / 100;
         fuelText.text = ((int)fuel).ToString() + "%"; //puaj
+
+        if (startTimer && timer < 2)
+        {
+            timer += Time.deltaTime;
+        }        
 
         if(fuel <= 0)
         {
@@ -92,14 +109,7 @@ public class Spaceship : MonoBehaviour
 
     public bool HasPlayerLanded()
     {
-        if(timer >= 3)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (timer >= 2);
     }
 
     void OnCollisionEnter2D(Collision2D col)
@@ -110,7 +120,28 @@ public class Spaceship : MonoBehaviour
         {
             Instantiate(explosion, transform.position, Quaternion.identity);
             Destroy(gameObject);
-            GameManager.alive = false;
-        }     
+            GameManager.isDead = true;
+        }
+        else if (col.relativeVelocity.magnitude <= landingSpeed &&
+                 col.gameObject.tag == "Landing Platform")
+             {
+                 startTimer = true;
+             }
+        else if (col.relativeVelocity.magnitude <= landingSpeed &&
+                 col.gameObject.tag == "Rock")
+             {
+                 onGround = true;
+             }
+
+    }
+
+    public void DestroyShip()
+    {
+        if (gameObject)
+        {
+            Instantiate(explosion, transform.position, Quaternion.identity);
+            Destroy(gameObject);
+            GameManager.isDead = true;
+        }
     }
 }
